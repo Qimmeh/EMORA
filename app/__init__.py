@@ -52,12 +52,12 @@ def create_app(config_class=Config):
     def serve_index():
         return send_from_directory(frontend_dir, "index.html")
 
-    @app.route("/<path:filename>")
+    @app.route("/<path:filename>", methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"])
     def serve_static_page(filename):
         target_path = os.path.join(frontend_dir, filename)
         if os.path.exists(target_path) and os.path.isfile(target_path):
             return send_from_directory(frontend_dir, filename)
-        return "Page not found", 404
+        return jsonify({"error": "Page not found", "filename": filename}), 404
 
     @app.context_processor
     def inject_globals():

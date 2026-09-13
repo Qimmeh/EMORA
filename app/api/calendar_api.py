@@ -8,6 +8,7 @@ from flask import current_app, g, jsonify, redirect, request
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from app.api import api_bp, require_user
+from app.extensions import csrf
 from app.google_calendar import (
     GoogleCalendarService,
     GoogleOAuthClient,
@@ -444,6 +445,7 @@ def parse_schedule_text(text_content, user_id):
 
 @api_bp.route("/timetable/upload", methods=["POST", "OPTIONS"])
 @api_bp.route("/calendar/timetable/upload", methods=["POST", "OPTIONS"])
+@csrf.exempt
 @require_user
 def upload_timetable_file():
     if request.method == "OPTIONS":
@@ -545,6 +547,7 @@ def upload_timetable_file():
 
 @api_bp.route("/timetable/parse-text", methods=["POST", "OPTIONS"])
 @api_bp.route("/calendar/timetable/parse-text", methods=["POST", "OPTIONS"])
+@csrf.exempt
 @require_user
 def parse_timetable_text_endpoint():
     if request.method == "OPTIONS":
@@ -575,6 +578,7 @@ def parse_timetable_text_endpoint():
 
 @api_bp.route("/ai/chat", methods=["POST", "OPTIONS"])
 @api_bp.route("/calendar/ai/chat", methods=["POST", "OPTIONS"])
+@csrf.exempt
 @require_user
 def ai_chat_endpoint():
     if request.method == "OPTIONS":
