@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://dcsion3-git-232142192878.europe-west1.run.app/api/:path*"
-    },
-    {
       "source": "/:path*",
       "destination": "/frontend/:path*"
     }
