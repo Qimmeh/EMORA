@@ -18,14 +18,14 @@
 
     // Auto-detect environment:
     let apiBase = '';
-    if (isNativeMobile || window.location.hostname.includes('vercel.app')) {
-        apiBase = PRODUCTION_CLOUD_BACKEND;
-    } else if (
+    if (
         window.location.protocol === 'file:' ||
-        ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
-         window.location.port !== '5000' && window.location.port !== '')
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1'
     ) {
-        apiBase = 'http://localhost:5000';
+        apiBase = (window.location.port === '5000' || window.location.port === '') ? '' : 'http://localhost:5000';
+    } else if (isNativeMobile || window.location.hostname.includes('vercel.app')) {
+        apiBase = PRODUCTION_CLOUD_BACKEND;
     }
 
     window.DCSION3_CONFIG = {
