@@ -59,53 +59,6 @@ Integrated pop up chat assistant that is able to understand the user’s current
 
 &nbsp;
 
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
 
 2. ## **Ideation & Process**
 
@@ -152,21 +105,33 @@ Link: [https://www.tldraw.com/f/xax6UxXrT-Q7Wuss3DEvC?d=v58975.-7024.25600.13307
 
 &nbsp;
 
-## 
+---
 
-## 
+## 3. Design & Prototype
 
-3. ## **Design & Prototype**
+**UI Prototype:** [http://o7f8cifsp6c4ccztaw5ixzsm.149.118.132.238.sslip.io/](http://o7f8cifsp6c4ccztaw5ixzsm.149.118.132.238.sslip.io/)
 
-   **UI Prototype:** [http://o7f8cifsp6c4ccztaw5ixzsm.149.118.132.238.sslip.io/](http://o7f8cifsp6c4ccztaw5ixzsm.149.118.132.238.sslip.io/)  
-   &nbsp;  
-   &nbsp;  
-   &nbsp;  
-   &nbsp;
+### Interface Previews
 
-   ## 
+| **Dashboard Overview** | **Interactive Timetable** |
+| :---: | :---: |
+| [![Dashboard Overview](asset/home.png)](asset/home.png) | [![Interactive Timetable](asset/timetable.png)](asset/timetable.png) |
 
-4. ## **What Makes It Different**&nbsp;
+| **Task Scheduler** | **AI Assistant** |
+| :---: | :---: |
+| [![Task Scheduler](asset/scheduler.png)](asset/scheduler.png) | [![AI Assistant](asset/assistant.png)](asset/assistant.png) |
+
+| **Emotion Companion** | **Stress Regulation (Balloon Breathing)** |
+| :---: | :---: |
+| [![Emotion Companion](asset/emotion.png)](asset/emotion.png) | [![Balloon Breathing](asset/balloon.png)](asset/balloon.png) |
+
+| **Dark Mode & Ambient Theming** | **Account & Settings** |
+| :---: | :---: |
+| [![Dark Mode](asset/dark.png)](asset/dark.png) | [![Account Settings](asset/account.png)](asset/account.png) |
+
+---
+
+## 4. What Makes It Different
 
    &nbsp;
 
@@ -183,6 +148,8 @@ Emora employs a modern, decoupled client-server architecture designed for high r
 ---
 
 ### 5.1 System Architecture Diagram
+![System Architecture Diagram](assets/architecture.png)
+&nbsp;
 
 ```mermaid
 flowchart TD
