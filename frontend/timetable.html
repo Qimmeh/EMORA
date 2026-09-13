@@ -1638,6 +1638,15 @@
 			width: calc(100% - 268px);
 			max-width: none;
 			padding: 42px 46px 60px;
+			opacity: 0;
+			transform: translateY(14px);
+			transition: opacity .45s cubic-bezier(.16,1,.3,1), transform .45s cubic-bezier(.16,1,.3,1);
+		}
+		body.page-loaded .content-area { opacity: 1; transform: translateY(0); }
+		body.page-leaving .content-area {
+			opacity: 0;
+			transform: translateY(-10px);
+			transition: opacity .22s ease, transform .22s ease;
 		}
 
 		.header-title,
@@ -4356,6 +4365,36 @@ body.night .privacy strong {
 				}
 			} catch(e) {}
 		})();
+	</script>
+	<script>
+		// Page enter animation
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => document.body.classList.add('page-loaded'));
+		});
+
+		// Re-trigger the enter animation when restored from bfcache (browser back/forward)
+		window.addEventListener('pageshow', (e) => {
+			if (e.persisted) {
+				document.body.classList.remove('page-leaving');
+				requestAnimationFrame(() => document.body.classList.add('page-loaded'));
+			}
+		});
+
+		// Page exit animation before navigating to another internal page
+		// (delegated on document + capture phase so it also covers the sidebar,
+		// which is injected later by sidebar.js)
+		document.addEventListener('click', (e) => {
+			const link = e.target.closest('a[href$=".html"]');
+			if (!link) return;
+			if (link.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+			const href = link.getAttribute('href');
+			if (!href) return;
+			e.preventDefault();
+			e.stopPropagation();
+			document.body.classList.remove('page-loaded');
+			document.body.classList.add('page-leaving');
+			setTimeout(() => { window.location.href = href; }, 220);
+		}, true);
 	</script>
 	<script src="timetable.js"></script>
 	<script src="sidebar.js"></script>
