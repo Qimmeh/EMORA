@@ -13,8 +13,9 @@
         window.Capacitor.isNativePlatform()
     );
 
-    // Production backend URL (Google Cloud Run)
-    const PRODUCTION_CLOUD_BACKEND = 'https://dcsion3-git-232142192878.europe-west1.run.app';
+    // Production backend URL (Coolify / Self-Hosted)
+    // When served via Coolify or behind a reverse proxy, relative '' routes directly to the backend
+    const COOLIFY_BACKEND_URL = window.COOLIFY_BACKEND_URL || '';
 
     // Auto-detect environment:
     let apiBase = '';
@@ -25,13 +26,13 @@
     ) {
         apiBase = (window.location.port === '5000' || window.location.port === '') ? '' : 'http://localhost:5000';
     } else {
-        apiBase = PRODUCTION_CLOUD_BACKEND;
+        apiBase = COOLIFY_BACKEND_URL;
     }
 
     window.DCSION3_CONFIG = {
         IS_NATIVE: isNativeMobile,
         API_BASE_URL: apiBase,
-        PRODUCTION_CLOUD_BACKEND: PRODUCTION_CLOUD_BACKEND,
+        COOLIFY_BACKEND_URL: COOLIFY_BACKEND_URL,
         VERSION: '1.0.0',
         ENV: isNativeMobile ? 'production_mobile' : 'web'
     };
