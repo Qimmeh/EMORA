@@ -11,4 +11,4 @@ env
 .env
 .git
 .gitignore
-frontend/
+node_modules
