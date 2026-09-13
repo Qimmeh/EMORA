@@ -148,7 +148,7 @@ Emora employs a modern, decoupled client-server architecture designed for high r
 ---
 
 ### 5.1 System Architecture Diagram
-![System Architecture Diagram](assets/architecture.png)
+![System Architecture Diagram](asset/architecture.jpeg)
 &nbsp;
 
 ```mermaid
