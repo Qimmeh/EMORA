@@ -8,3 +8,4 @@ python-dotenv==1.0.1
 requests
 PyMuPDF
 Pillow
+psycopg2-binary
