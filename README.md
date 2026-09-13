@@ -4,7 +4,9 @@
 
 **Problem Statement:** Stress & Workload Manager
 
-**Video Presentation:**&nbsp;
+**Video Presentation:** [https://youtu.be/coFNilHV4Vs](https://youtu.be/coFNilHV4Vs)
+
+&nbsp;
 
 **Presentation Slides:** [https://canva.link/99wq4808xd4f8ns](https://canva.link/99wq4808xd4f8ns)
 
@@ -174,354 +176,211 @@ Link: [https://www.tldraw.com/f/xax6UxXrT-Q7Wuss3DEvC?d=v58975.-7024.25600.13307
 | Task scheduling requires a user’s due diligence and own initiative to choose and select which is an extremely tedious process | Timetable schedule for to-do list tasks with the ability to choose between more than one time and dynamically adjust the remaining available time for other tasks |
 | Descriptive and generic advice on how to handle and tackle stress in the FAQ page | We used an interactive balloon breathing practice as a visual cue for inhalation and exhalation to regulate stress |
 
-   &nbsp;
-
-   &nbsp;
-
-   ## 
-
-5. ##  **Technical Architecture & Feasibility**
-
-&nbsp;
-
-   **The system is divided into five main parts:**
-
-   &nbsp;
-
-   1\. Users
-
-   2\. Application Server
-
-   3\. Database
-
-   4\. AI Models
-
-   5\. Google Calendar Integration
-
-   &nbsp;
-
-   \---
-
-   &nbsp;
-
-   **1\. Users**
-
-   &nbsp;
-
-   Emora can be accessed through:
-
-   &nbsp;
-
-   \- \*\*Web Browser\*\* — Users access Emora directly through a browser.
-
-   \- \*\*Mobile App\*\* — A mobile version of Emora is packaged from the web application using Capacitor.
-
-   &nbsp;
-
-   Both platforms communicate with the same backend, so users can access the same data across devices.
-
-   &nbsp;
-
-   \---
-
-   &nbsp;
-
-   **2\. Application Server**
-
-   &nbsp;
-
-   The main Emora application is hosted on an \*\*Oracle VPS\*\* using \*\*Coolify\*\*.
-
-   &nbsp;
-
-   It contains two main components:
-
-   &nbsp;
-
-   **Frontend**
-
-   &nbsp;
-
-   The frontend is responsible for the user interface.
-
-   &nbsp;
-
-   \*\*Technology:\*\*
-
-   \- HTML
-
-   \- CSS
-
-   &nbsp;
-
-   The frontend allows users to:
-
-   &nbsp;
-
-   \- View their workload
-
-   \- View their timetable
-
-   \- Manage tasks
-
-   \- View workload and burnout information
-
-   \- Interact with Emora's AI features
-
-   &nbsp;
-
-   **Backend API**
-
-   &nbsp;
-
-   The backend handles the main application logic.
-
-   &nbsp;
-
-   \*\*Technology:\*\*
-
-   \- Python
-
-   \- Flask
-
-   &nbsp;
-
-   The backend is responsible for:
-
-   &nbsp;
-
-   \- Processing user requests
-
-   \- Managing tasks and schedules
-
-   \- Calculating workload information
-
-   \- Communicating with the database
-
-   \- Sending AI requests to OpenRouter
-
-   \- Connecting to Google Calendar
-
-   &nbsp;
-
-   The frontend communicates with the backend through an API.
-
-   &nbsp;
-
-   \---
-
-   &nbsp;
-
-   **3\. Database**
-
-   &nbsp;
-
-   Emora uses \*\*Supabase\*\* to host its PostgreSQL database.
-
-   &nbsp;
-
-   The database stores important application data such as:
-
-   &nbsp;
-
-   \- User information
-
-   \- Timetable schedules
-
-   \- Tasks
-
-   \- Workload data
-
-   \- Historical workload information
-
-   \- Other application settings
-
-   &nbsp;
-
-   The backend communicates with Supabase to read and update this information.
-
-   &nbsp;
-
-   \---
-
-   &nbsp;
-
-   **4\. AI Models**
-
-   &nbsp;
-
-   Emora uses \*\*OpenRouter\*\* as the AI provider.
-
-   &nbsp;
-
-   Instead of connecting directly to a single AI model, the backend sends AI requests through OpenRouter.
-
-   &nbsp;
-
-   The current model setup uses multiple models:
-
-   &nbsp;
-
-   **Primary Model**
-
-   \*\*Ling 3.0 Flash VL\*\*
-
-   &nbsp;
-
-   Used as the main AI model because it provides strong performance while being available for free.
-
-   &nbsp;
-
-   **Fallback Model**
-
-   \*\*Llama 3.3 70B\*\*
-
-   &nbsp;
-
-   Used when the primary model is unavailable or fails.
-
-   &nbsp;
-
-   **Final Fallback**
-
-   \*\*Gemini 2.5 Flash\*\*
-
-   &nbsp;
-
-   Used as an additional backup option.
-
-   &nbsp;
-
-   This setup allows Emora to continue providing AI functionality even if the primary model is temporarily unavailable.
-
-   &nbsp;
-
-   \---
-
-   &nbsp;
-
-   **5\. Google Calendar Integration**
-
-   &nbsp;
-
-   Emora can connect with \*\*Google Calendar\*\* to help users synchronize their schedules.
-
-   &nbsp;
-
-   The integration uses \*\*Google OAuth 2.0\*\*.
-
-   &nbsp;
-
-   **Basic Flow**
-
-   &nbsp;
-
-   1\. User chooses to connect Google Calendar.
-
-   2\. User gives Emora permission through Google OAuth.
-
-   3\. Emora receives authorized access.
-
-   4\. The backend communicates with Google Calendar.
-
-   5\. Calendar events can be synchronized with Emora.
-
-   &nbsp;
-
-   This allows Emora to use existing calendar information without requiring users to manually enter every schedule.
-
-   &nbsp;
-
-   \---
-
-   &nbsp;
-
-   **Overall Data Flow**
-
-   &nbsp;
-
-   The basic flow of Emora is:
-
-   &nbsp;
-
-   **User → Frontend → Backend API → Database**
-
-   &nbsp;
-
-   When AI assistance is required:
-
-   &nbsp;
-
-   **User → Frontend → Backend API → OpenRouter → AI Model → Backend → Frontend**
-
-   &nbsp;
-
-   For Google Calendar:
-
-   &nbsp;
-
-   **User → Frontend → Backend API → Google OAuth → Google Calendar**
-
-   &nbsp;
-
-   \---
-
-   &nbsp;
-
-   **Deployment Overview**
-
-   &nbsp;
-
-   | Component | Technology / Service | Purpose |
-
-   |---|---|---|
-
-   | Frontend | HTML / CSS | User interface |
-
-   | Backend | Python Flask | Application logic and API |
-
-   | Hosting | Oracle VPS \+ Coolify | Runs the Emora application |
-
-   | Database | Supabase PostgreSQL | Stores application data |
-
-   | AI Gateway | OpenRouter | Connects Emora to AI models |
-
-   | Primary AI | Ling 3.0 Flash VL:free | Main AI model |
-
-   | AI Fallback | Llama 3.3 70B:free | Backup AI model |
-
-   | Final AI Fallback | Gemini 2.5 Flash:cheap | Additional backup |
-
-   | Calendar | Google Calendar API | Calendar synchronization |
-
-   | Authentication | Google OAuth 2.0 | Allows users to authorize Calendar access |
-
-   | Mobile | Capacitor | Packages the web app as a mobile application |
-
-   &nbsp;
-
-&nbsp;
-
-### Build plan & scope
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
+## 5. Technical Architecture & Feasibility
+
+Emora employs a modern, decoupled client-server architecture designed for high responsiveness, cross-platform availability, and resilient AI capabilities with automated fallback handling.
+
+---
+
+### 5.1 System Architecture Diagram
+
+```mermaid
+flowchart TD
+    subgraph Clients["1. Client Layer"]
+        Web["Web Browser\n(HTML5 / CSS / Vanilla JS)"]
+        Mobile["Mobile App\n(Capacitor Hybrid Container)"]
+    end
+
+    subgraph Host["2. Application Server (Oracle VPS + Coolify)"]
+        subgraph FrontendServer["Frontend Interface"]
+            UI["Responsive Dashboards & Views\n• Workload Analytics\n• Timetable & Task Manager\n• AI Companion & Emotion Theming\n• Balloon Breathing Mini-App"]
+        end
+        subgraph BackendServer["Backend API (Python & Flask)"]
+            API["Core Application Logic\n• Task & Schedule Scheduling Engine\n• Cognitive Load & Workload Inference\n• Emotion & Theme Coordinator\n• Auth & Session Handler"]
+        end
+    end
+
+    subgraph DB["3. Database Layer (Supabase)"]
+        Postgres[("PostgreSQL Database\n• User Profiles & Auth\n• Timetables & Fixed/Flexible Slots\n• Micro-Tasks & Status\n• Workload Metrics & History")]
+    end
+
+    subgraph AI["4. AI Models & Gateway (OpenRouter)"]
+        Gateway["OpenRouter Routing Gateway"]
+        M1["Primary Model\nLing 3.0 Flash VL (Free)\nFast Multimodal & OCR"]
+        M2["Fallback Model 1\nLlama 3.3 70B (Free)\nReasoning & Dialogue"]
+        M3["Fallback Model 2\nGemini 2.5 Flash (Cheap)\nHigh Availability Backup"]
+    end
+
+    subgraph Integrations["5. External Integrations"]
+        OAuth["Google OAuth 2.0\n(User Authorization)"]
+        GCal["Google Calendar API\n(Schedule Import & Sync)"]
+    end
+
+    %% Client communication
+    Web -->|HTTPS| UI
+    Mobile -->|Capacitor Bridge| UI
+    UI <-->|REST API JSON| API
+
+    %% Database communication
+    API <-->|SQL / PostgREST| Postgres
+
+    %% AI Pipeline
+    API -->|Prompt & Vision Payloads| Gateway
+    Gateway -->|1. Primary Route| M1
+    M1 -.->|Failover on Error/Rate-limit| M2
+    M2 -.->|Failover on Error| M3
+    Gateway -->>|Aggregated Result| API
+
+    %% Calendar Integration
+    API <-->|OAuth Handshake| OAuth
+    OAuth -->|Authorized Scopes| GCal
+    GCal <-->|Sync Event Data| API
+```
+
+---
+
+### 5.2 Core System Components
+
+#### 1. Users & Presentation Layer
+Emora is designed to be accessible across any device without platform disparity:
+- **Web Browser**: Direct web access providing a lightweight, responsive desktop and mobile web experience.
+- **Mobile Application**: Packaged natively from the web application using **Capacitor**, enabling seamless access on mobile devices with future support for widgets.
+- **Unified Experience**: Both web and mobile applications connect to the same backend API, ensuring instant state and schedule synchronization across devices.
+
+#### 2. Application Server (Oracle VPS + Coolify)
+Hosted reliably on an **Oracle VPS** and orchestrated using **Coolify**.
+
+- **Frontend (HTML5 / Vanilla CSS / JavaScript)**
+  - Fast, dependency-free interface delivering smooth micro-animations.
+  - Workload and burnout visualization indicators.
+  - Interactive schedule manager and dynamic micro-task allocator.
+  - Floating Emora AI companion with emotion-driven ambient theme shifting.
+  - Balloon breathing regulation mini-game for guided stress relief.
+
+- **Backend API (Python Flask)**
+  - Centralized RESTful API handling core business and schedule logic.
+  - Task splitting algorithms that break daunting assignments into micro-steps.
+  - Cognitive and physical workload calculation engine (Academic, Work, Personal).
+  - Database connectivity layer communicating with Supabase PostgreSQL.
+  - Resilient AI proxy dispatching requests through OpenRouter.
+  - Calendar integration bridge utilizing Google OAuth 2.0.
+
+#### 3. Database Layer (Supabase PostgreSQL)
+Persistent storage managed through **Supabase**, hosting a cloud PostgreSQL database storing:
+- User accounts, authentication states, and personal settings.
+- Timetable schedules (fixed classes/commitments vs. flexible study blocks).
+- Micro-tasks, completion statuses, and deadlines.
+- Real-time and historical workload scores to identify burnout trends.
+- Application preferences and mood logs.
+
+#### 4. AI Models & Failover Gateway (OpenRouter)
+Rather than tightly coupling to a single model provider, Emora leverages **OpenRouter** with an automated multi-tier fallback architecture to guarantee uninterrupted availability:
+- **Primary Model — Ling 3.0 Flash VL (`:free`)**: Used for primary schedule extraction, multimodal timetable OCR, and general task assistance at zero operating cost.
+- **Fallback Model 1 — Llama 3.3 70B (`:free`)**: Automatically engaged if the primary model fails or experiences rate limits, providing robust reasoning and companion conversations.
+- **Fallback Model 2 — Gemini 2.5 Flash (`:cheap`)**: Acts as a high-reliability tertiary fallback to guarantee 99.9% uptime for critical user flows.
+
+#### 5. Google Calendar Integration
+Enables bi-directional timetable synchronization without requiring repetitive manual schedule input:
+- **Google OAuth 2.0**: Secure user-authorized access without sharing credentials.
+- **Google Calendar API**: Imports lectures, meetings, and personal events directly into Emora's schedule manager.
+- **Smart Categorization**: Extracted events are automatically mapped into Academic, Work, or Personal buckets for workload tracking.
+
+---
+
+### 5.3 System Data Flows
+
+#### A. Standard User & Application Flow
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Frontend as Frontend UI
+    participant Backend as Backend API (Flask)
+    participant DB as Supabase (PostgreSQL)
+
+    User->>Frontend: Create / Update Task or View Schedule
+    Frontend->>Backend: REST API Request (JSON)
+    Backend->>DB: Query / Insert / Update Records
+    DB-->>Backend: Confirmed Record Data
+    Backend-->>Frontend: Formatted JSON Response
+    Frontend-->>User: Dynamic UI & Workload Meter Update
+```
+
+#### B. AI Request & Failover Routing
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Frontend as Frontend UI
+    participant Backend as Backend API (Flask)
+    participant Gateway as OpenRouter Gateway
+    participant M1 as Ling 3.0 Flash VL (Primary)
+    participant M2 as Llama 3.3 70B (Fallback 1)
+    participant M3 as Gemini 2.5 Flash (Fallback 2)
+
+    User->>Frontend: Trigger AI (Timetable Scan / Task Breakdown / Chat)
+    Frontend->>Backend: POST /api/ai/...
+    Backend->>Gateway: Send Inference Request
+    alt Primary Available
+        Gateway->>M1: Inference Prompt
+        M1-->>Gateway: Successful Result
+    else Primary Unavailable / Error
+        Gateway->>M2: Fallback Route
+        M2-->>Gateway: Successful Result
+    else Both Fail
+        Gateway->>M3: Emergency Fallback
+        M3-->>Gateway: Successful Result
+    end
+    Gateway-->>Backend: AI Response Payload
+    Backend-->>Frontend: Processed Data & Suggestions
+    Frontend-->>User: Display AI Breakdown & Update Theming
+```
+
+#### C. Google Calendar Synchronization
+```mermaid
+flowchart LR
+    User([User]) -->|1. Connect Calendar| UI[Frontend UI]
+    UI -->|2. Authorize| OAuth[Google OAuth 2.0]
+    OAuth -->|3. Access Token| Backend[Backend API]
+    Backend -->|4. Fetch Calendar Events| GCal[Google Calendar API]
+    GCal -->|5. Raw Events| Backend
+    Backend -->|6. Map & Classify Categories| DB[(Supabase DB)]
+    Backend -->|7. Return Timetable| UI
+    UI -->|8. Visual Schedule| User
+```
+
+---
+
+### 5.4 Deployment & Infrastructure Specifications
+
+| Component | Technology / Service | Purpose |
+| :--- | :--- | :--- |
+| **Frontend** | HTML5, Vanilla CSS, JavaScript | Interactive, responsive user interface and dynamic theming |
+| **Mobile Shell** | Capacitor | Packages web application into an installable mobile experience |
+| **Backend API** | Python (Flask) | Business logic, scheduling algorithms, and service orchestration |
+| **Hosting & Ops** | Oracle Cloud VPS + Coolify | Containerized hosting, SSL, and deployment automation |
+| **Database** | Supabase (PostgreSQL) | Secure, managed relational database with persistent storage |
+| **AI Gateway** | OpenRouter | Unified model API routing and automated multi-tier failover |
+| **Primary AI** | Ling 3.0 Flash VL (`:free`) | Primary multimodal vision-language model for OCR and tasks |
+| **AI Fallback 1** | Llama 3.3 70B (`:free`) | Secondary LLM fallback for conversational companion and reasoning |
+| **AI Fallback 2** | Gemini 2.5 Flash (`:cheap`) | High-speed, high-availability tertiary safety net |
+| **Authentication** | Google OAuth 2.0 | Secure authorization and granular calendar permission scopes |
+| **Calendar Service** | Google Calendar API | External schedule synchronization and event extraction |
+
+---
+
+## 6. Build Plan & Scope
 
 | Feature | Current State | Build Plan Requirements |
-| :---- | :---- | :---- |
-| Database | Database is empty. Nothing is currently written/read; pages reload to the same hardcoded data. | Connect all app data to the database. Replace hardcoded data with real CRUD operations and persistent user data. |
-| User Authentication | Login and sign-up are not implemented. | Implement sign-up, login, logout, session management, and user profiles. |
-| Homepage Activity Percentage | Activity categorization is incomplete, so workload percentages are not fully accurate. | Complete activity categorization rules and connect them to the Academic, Work, and Personal workload calculations. |
-| AI Assistant — User Preference | AI can scan timetables and process user input, but does not proactively interact with the user. | Make the AI understand user preferences and proactively provide relevant suggestions based on their schedule and workload. |
-| Emora AI Companion | Companion mainly collects the user's emotions but does not understand their actual schedule/workload. | Combine emotion, timetable, tasks, and workload data so the companion can understand the user's situation before responding. |
-| Interactive Timetable & Task List | Timetable lacks detail and task-list navigation is flawed. | Improve timetable/task interactions, navigation, task details, editing, and Fixed/Non-Fixed schedule handling. |
-| Mobile UI & Home Screen Gadget | Mobile UI and home-screen gadget have not been built. | Build responsive mobile UI and a mobile home-screen widget/gadget for quick workload updates and AI suggestions. |
-| Google Calendar API | Calendar import works conceptually, but extracted activities are not categorized yet. | Categorize imported calendar activities automatically and map them into Emora's workload system. |
-| Outlook Calendar | Not implemented. | Add Outlook Calendar integration and apply the same activity extraction and categorization system. |
-| AI Suggested Rest Time | Not implemented. | Use workload, schedule gaps, and user preferences to recommend suitable rest/recovery periods. |
-| AI Calendar Adjustment | Not implemented. | Detect overloaded days and suggest moving flexible tasks to lower-stress periods. |
-
-&nbsp;
+| :--- | :--- | :--- |
+| **Database** | Database is empty. Nothing is currently written/read; pages reload to the same hardcoded data. | Connect all app data to the database. Replace hardcoded data with real CRUD operations and persistent user data. |
+| **User Authentication** | Login and sign-up are not implemented. | Implement sign-up, login, logout, session management, and user profiles. |
+| **Homepage Activity Percentage** | Activity categorization is incomplete, so workload percentages are not fully accurate. | Complete activity categorization rules and connect them to the Academic, Work, and Personal workload calculations. |
+| **AI Assistant — User Preference** | AI can scan timetables and process user input, but does not proactively interact with the user. | Make the AI understand user preferences and proactively provide relevant suggestions based on their schedule and workload. |
+| **Emora AI Companion** | Companion mainly collects the user's emotions but does not understand their actual schedule/workload. | Combine emotion, timetable, tasks, and workload data so the companion can understand the user's situation before responding. |
+| **Interactive Timetable & Task List** | Timetable lacks detail and task-list navigation is flawed. | Improve timetable/task interactions, navigation, task details, editing, and Fixed/Non-Fixed schedule handling. |
+| **Mobile UI & Home Screen Gadget** | Mobile UI and home-screen gadget have not been built. | Build responsive mobile UI and a mobile home-screen widget/gadget for quick workload updates and AI suggestions. |
+| **Google Calendar API** | Calendar import works conceptually, but extracted activities are not categorized yet. | Categorize imported calendar activities automatically and map them into Emora's workload system. |
+| **Outlook Calendar** | Not implemented. | Add Outlook Calendar integration and apply the same activity extraction and categorization system. |
+| **AI Suggested Rest Time** | Not implemented. | Use workload, schedule gaps, and user preferences to recommend suitable rest/recovery periods. |
+| **AI Calendar Adjustment** | Not implemented. | Detect overloaded days and suggest moving flexible tasks to lower-stress periods. |
