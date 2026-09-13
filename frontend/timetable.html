@@ -3508,10 +3508,16 @@ body.night .privacy strong {
 					const apiBase = (window.DCSION3_CONFIG && window.DCSION3_CONFIG.API_BASE_URL) || '';
 					if (confirmImportBtn) confirmImportBtn.innerHTML = '<span>Uploading...</span>';
 					try {
-						const response = await fetch(apiBase + '/api/v1/timetable/upload', {
+						let response = await fetch(apiBase + '/api/v1/timetable/upload', {
 							method: 'POST',
 							body: formData
 						});
+						if (response.status === 405 || response.status === 404) {
+							response = await fetch(apiBase + '/api/v1/calendar/timetable/upload', {
+								method: 'POST',
+								body: formData
+							});
+						}
 						const data = await response.json();
 						importPopover.classList.remove('open');
 						if (response.ok && data.timetable) {
@@ -3539,11 +3545,18 @@ body.night .privacy strong {
 					const apiBase = (window.DCSION3_CONFIG && window.DCSION3_CONFIG.API_BASE_URL) || '';
 					confirmImportBtn.innerHTML = '<span>Parsing...</span>';
 					try {
-						const response = await fetch(apiBase + '/api/v1/timetable/parse-text', {
+						let response = await fetch(apiBase + '/api/v1/timetable/parse-text', {
 							method: 'POST',
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({ text: text })
 						});
+						if (response.status === 405 || response.status === 404) {
+							response = await fetch(apiBase + '/api/v1/calendar/timetable/parse-text', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ text: text })
+							});
+						}
 						const data = await response.json();
 						importPopover.classList.remove('open');
 						if (response.ok && data.timetable) {
