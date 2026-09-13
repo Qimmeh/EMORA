@@ -18,7 +18,7 @@
 
     // Auto-detect environment:
     let apiBase = '';
-    if (isNativeMobile || window.location.hostname.includes('vercel.app')) {
+    if (isNativeMobile) {
         apiBase = PRODUCTION_CLOUD_BACKEND;
     } else if (
         window.location.protocol === 'file:' ||
