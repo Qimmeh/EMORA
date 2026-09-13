@@ -58,6 +58,7 @@ class User(UserMixin, db.Model):
 
     # Smart Scheduler & Recommendations
     recommendations = db.relationship('Recommendation', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    journal_entries = db.relationship('JournalEntry', backref='author', lazy='dynamic', cascade='all, delete-orphan')
     activity_dependencies = db.relationship('ActivityDependency', backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
     # Capacity Simulator & Ghost Schedules
@@ -1206,3 +1207,26 @@ class TimerSession(db.Model):
     completed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref=db.backref('timer_sessions', lazy='dynamic'))
+
+
+class JournalEntry(db.Model):
+    """
+    Journal Entry model for storing user reflective notes and emotion tracking.
+    """
+    __tablename__ = 'journal_entries'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
+    content = db.Column(db.Text, nullable=False)
+    top_emotion = db.Column(db.String(32), default="joy")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "content": self.content,
+            "top_emotion": self.top_emotion,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
+

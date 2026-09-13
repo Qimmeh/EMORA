@@ -21,10 +21,10 @@ instance/
 .DS_Store
 Thumbs.db
 
-# Node dependencies
+# Node dependencies & caches
 node_modules/
 package-lock.json
 
-# IDE
+# IDE & testing
 .idea/
-
+.pytest_cache/

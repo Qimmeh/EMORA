@@ -1,4 +1,5 @@
-from flask import Flask
+import os
+from flask import Flask, send_from_directory, request, jsonify
 from flask_login import current_user
 from flask_cors import CORS
 
@@ -7,51 +8,67 @@ from app.extensions import db, login_manager, csrf
 
 
 def create_app(config_class=Config):
-    app = Flask(__name__, template_folder="../frontend", static_folder="../frontend")
+    frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
+    app = Flask(
+        __name__,
+        static_folder=frontend_dir,
+        template_folder=frontend_dir,
+        static_url_path=""
+    )
     app.config.from_object(config_class)
 
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+    @app.after_request
+    def add_cors_headers(response):
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-User-Id"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        return response
 
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
 
-    from app import models as app_models
     from app.models import User
-
 
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
 
     from app.auth import bp as auth_bp
-    from app.main import bp as main_bp
-    from app.tasks import bp as tasks_bp
-    from app.wellbeing import bp as wellbeing_bp
+    from app.journal import bp as journal_bp
+    from app.ai import bp as ai_bp
     from app.api import api_bp
 
     csrf.exempt(api_bp)
 
     app.register_blueprint(auth_bp)
-    app.register_blueprint(main_bp)
-    app.register_blueprint(tasks_bp)
-    app.register_blueprint(wellbeing_bp)
+    app.register_blueprint(journal_bp)
+    app.register_blueprint(ai_bp)
     app.register_blueprint(api_bp)
+
+    @app.route("/")
+    def serve_index():
+        return send_from_directory(frontend_dir, "index.html")
+
+    @app.route("/<path:filename>", methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"])
+    def serve_static_page(filename):
+        target_path = os.path.join(frontend_dir, filename)
+        if os.path.exists(target_path) and os.path.isfile(target_path):
+            return send_from_directory(frontend_dir, filename)
+        return jsonify({"error": "Page not found", "filename": filename}), 404
 
     @app.context_processor
     def inject_globals():
         return {"current_user": current_user}
 
     with app.app_context():
+        db.create_all()
         try:
-            table_count = len(db.Model.metadata.tables)
-            print(f"Connecting to database and creating {table_count} tables via db.create_all()...", flush=True)
-            db.create_all()
-            print("db.create_all() finished successfully! All tables verified.", flush=True)
             from app.schema_sync import sync_db_columns
             sync_db_columns(db)
-        except Exception as err:
-            print(f"FAILED to run db.create_all(): {err}", flush=True)
+        except Exception as e:
+            print("schema_sync warning:", e)
 
-
-    return app
+    return app

@@ -62,6 +62,7 @@ def internal_error(e):
 
 @api_bp.route("/health", methods=["GET"])
 def health():
+    from flask import current_app
     from app.extensions import db
     from sqlalchemy import inspect
     db_status = "unknown"
@@ -76,15 +77,27 @@ def health():
         db_status = "error"
         error = str(e)
 
+    routes = [f"{rule.endpoint}: {rule.rule} ({','.join(rule.methods or [])})" for rule in current_app.url_map.iter_rules()]
+
     return jsonify({
         "status": "online",
         "database": db_status,
         "table_count": len(tables),
         "tables": tables,
+        "registered_routes": routes,
         "error": error
     })
 
 
 # Import and attach route handlers
-from app.api import workload_api, activities_api, simulation_api, ghost_api, recovery_api, battery_api, burnout_api, scheduler_api
-
+from app.api import (
+    workload_api,
+    activities_api,
+    simulation_api,
+    ghost_api,
+    recovery_api,
+    battery_api,
+    burnout_api,
+    scheduler_api,
+    calendar_api,
+)
