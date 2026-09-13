@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script src="config.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Balloon Breath | emora Wellbeing</title>
+	<script>
+		(function() {
+			try {
+				var t = localStorage.getItem('theme') || localStorage.getItem('emora-theme');
+				if (t === 'night') {
+					document.documentElement.classList.add('night');
+					document.documentElement.style.backgroundColor = '#14100c';
+					document.documentElement.style.colorScheme = 'dark';
+				}
+			} catch (e) {}
+		})();
+	</script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="sidebar.css">
+	<link rel="stylesheet" href="emora-bot.css">
+	<style>
+		:root {
+			--paper: #f5f6fa;
+			--surface: #ffffff;
+			--ink: #17191d;
+			--muted: #7d8188;
+			--line: #e6e7eb;
+			--accent: #f37b32;
+			--accent-soft: #ffeadb;
+			--accent-strong: #ed7130;
+			--sage: #d8f2e4;
+			--sage-ink: #567467;
+			--gold: #ffc247;
+			--red: #ef4b62;
+			--shadow: 0 12px 30px rgba(32, 36, 45, .07);
+			--radius: 16px;
+			--transition: all .25s cubic-bezier(.16,1,.3,1);
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			color: var(--ink);
+			background: linear-gradient(180deg, rgba(var(--wave-color-primary), 0.16) 0 140px, var(--paper, #f5f6fa) 320px);
+			font-family: "Manrope", sans-serif;
+			min-height: 100vh;
+			-webkit-font-smoothing: antialiased;
+			transition: background 0.4s ease, color 0.4s ease;
+		}
+
+		button { cursor: pointer; font: inherit; border: none; background: none; }
+		h1, h2, h3, p { margin: 0; }
+
+		.app-shell { display: flex; min-height: 100vh; }
+
+		/* ---------- Main Layout ---------- */
+		main {
+			width: min(1220px, 100%);
+			margin: 0 auto;
+			padding: 22px 40px 24px;
+			height: 100vh;
+			height: 100dvh;
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
+		}
+
+		.topbar {
+			display: flex; align-items: flex-start; justify-content: space-between;
+			gap: 20px; margin-bottom: 14px; position: relative;
+			padding-left: 56px;
+			flex: none;
+			z-index: 5;
+		}
+		.topbar::after {
+			content: "";
+			position: absolute; right: 76px; top: -12px;
+			width: 58px; height: 58px;
+			border: 1px solid rgba(var(--wave-color-primary), .24);
+			border-radius: 50%;
+			box-shadow: 0 0 0 10px rgba(var(--wave-color-primary), .07);
+			pointer-events: none;
+			transition: border-color 0.4s ease, box-shadow 0.4s ease;
+		}
+		.eyebrow { color: var(--accent-strong); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
+		.greeting { font-family: "Sora", sans-serif; font-size: clamp(22px,2.4vw,30px); font-weight: 700; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 4px; }
+		.intro { color: var(--muted); font-size: 12.5px; max-width: 560px; }			.diary-bar {
+				display: inline-flex; align-items: center; gap: 12px;
+				background: var(--surface); border: 1px solid var(--line);
+				border-radius: 999px; padding: 6px 18px; font-size: 13px; font-weight: 600;
+				box-shadow: var(--shadow);
+				align-self: flex-start;
+			}
+		.diary-bar b { color: var(--accent-strong); }
+
+		/* ---------- Dashboard Cards & Layout ---------- */		.layout-grid {
+			display: grid;
+			grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+			gap: 24px;
+			align-items: stretch;
+			flex: 1;
+			min-height: 0;
+		}
+
+		.panel { display: flex; flex-direction: column; gap: 14px; min-height: 0; max-height: 100%; }
+		.panel .card { flex: 1; min-height: 0; max-height: calc(100dvh - 240px); }
+
+		.card {
+			background: rgba(255,255,255,.88);
+			border: 1px solid var(--line);
+			border-radius: var(--radius);
+			padding: 14px 18px;
+			box-shadow: var(--shadow);
+			transition: var(--transition);
+		}
+		.card h2 {
+			margin: 0 0 8px; font-family: "Sora", sans-serif;
+			font-size: 13px; font-weight: 700; text-transform: uppercase;
+			letter-spacing: .08em; color: var(--muted);
+		}
+
+		.label-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: var(--muted); font-weight: 600; }
+		.label-row b { color: var(--ink); }
+
+		.meter { position: relative; height: 24px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+		.meter .target { position: absolute; right: 0; top: 0; bottom: 0; width: 20%; background: repeating-linear-gradient(45deg, rgba(86,116,103,.15) 0 6px, rgba(86,116,103,.25) 6px 12px); }
+		.meter .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--accent); transition: background .2s, width .1s linear; }
+
+		#phaseTxt { font-family: "Sora", sans-serif; font-size: 18px; font-weight: 700; text-align: center; margin-top: 10px; min-height: 26px; }
+		#phaseHint { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: 4px; line-height: 1.4; min-height: 36px; }
+
+		.cycles { display: flex; justify-content: center; gap: 12px; margin: 6px 0 10px; }
+		.dot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); transition: var(--transition); }
+		.dot.done { background: #4fb477; border-color: #4fb477; }
+		.dot.partial { background: var(--gold); border-color: var(--gold); }
+
+		.btn {
+			font-family: inherit; font-size: 13.5px; font-weight: 700;
+			background: var(--accent); color: #fff; border: 1px solid var(--accent);
+			border-radius: 999px; padding: 9px 18px; cursor: pointer;
+			box-shadow: 0 4px 14px rgba(243,123,50,.28); transition: var(--transition);
+		}
+		.btn:hover { background: var(--accent-strong); transform: translateY(-1px); }
+		.btn:active { transform: translateY(1px); }
+		.btn.ghost { background: var(--surface); color: var(--ink); border-color: var(--line); box-shadow: none; }
+		.btn.ghost:hover { border-color: var(--accent); color: var(--accent-strong); background: var(--accent-soft); }
+		.btn.small { font-size: 12px; padding: 6px 13px; }
+
+		.row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+		.howto { font-size: 12px; line-height: 1.6; color: var(--muted); }
+		.howto b { color: var(--ink); }
+		.howto kbd { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-family: inherit; color: var(--ink); font-weight: 700; }
+		.cite { font-size: 11px; line-height: 1.5; color: var(--muted); margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 10px; }
+
+		/* ---------- Ratio Gauge ---------- */
+		.breath-wrap { display: none; }
+		.breath-wrap.show { display: block; }
+		.ratio-bar { position: relative; display: flex; height: 24px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--paper); }
+		.ratio-in { width: 33.333%; background: var(--accent-soft); border-right: 1px solid var(--line); color: var(--accent-strong); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; letter-spacing: .5px; }
+		.ratio-track { flex: 1; position: relative; background: var(--surface); }
+		.ratio-out { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--accent); transition: width .08s linear; }
+		.ratio-out.ok { background: #4fb477; }
+		.ratio-read { display: flex; justify-content: space-between; font-size: 11.5px; margin-top: 6px; color: var(--muted); font-weight: 600; }
+		.ratio-read b { font-variant-numeric: tabular-nums; color: var(--ink); }
+		.breath-txt { font-size: 11.5px; text-align: center; color: var(--muted); margin-top: 6px; font-weight: 600; }
+
+		/* ---------- Stage Component ---------- */		.stage-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 0; overflow: hidden; }
+		.stage {
+			position: relative; align-self: center; flex: 0 1 auto; min-height: 0;
+			height: min(calc(100dvh - 240px), 620px);
+			max-width: 700px; aspect-ratio: 9/8;
+			background: linear-gradient(180deg, var(--surface) 0%, var(--paper) 100%);
+			border: 1px solid var(--line); border-radius: var(--radius);
+			box-shadow: var(--shadow); overflow: hidden; touch-action: none; cursor: pointer;
+		}
+		svg { width: 100%; height: 100%; display: block; }
+
+		#balloonG { transform-box: fill-box; transform-origin: 50% 100%; }
+		#balloonG.release { animation: releaseDeflate 1.7s cubic-bezier(.4,0,.3,1) forwards; }
+		@keyframes releaseDeflate {
+			0% { transform: scale(1,1) translateY(0); opacity: 1; }
+			30% { transform: scale(1.06,.94) translateY(-4px); opacity: 1; }
+			100% { transform: scale(.5,.5) translateY(-165px) rotate(6deg); opacity: 0; }
+		}
+		#stringG { transition: opacity .8s; }
+
+		.flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, #fff 0%, transparent 60%); opacity: 0; pointer-events: none; z-index: 3; }
+		.flash.go { animation: flash .45s ease-out; }
+		@keyframes flash { 0% { opacity: .9; } 100% { opacity: 0; } }
+
+		.hiss { position: absolute; z-index: 6; width: 3px; border-radius: 3px; background: var(--muted); animation: hiss .9s ease-out forwards; }
+		@keyframes hiss { to { opacity: 0; transform: translate(var(--dx, 30px), var(--dy, 10px)) scaleY(1.6); } }
+
+		.bit { position: absolute; z-index: 6; width: 9px; height: 9px; border-radius: 2px; background: var(--accent); animation: bitfly .8s ease-out forwards; }
+		@keyframes bitfly { to { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, 60px)) rotate(360deg); } }
+
+		/* Overlays */
+		.overlay {
+			position: absolute; inset: 0; background: rgba(255,255,255,.95);
+			display: flex; flex-direction: column; align-items: center; justify-content: center;
+			gap: 12px; text-align: center; padding: 24px; z-index: 10;
+			backdrop-filter: blur(4px);
+		}
+		.overlay.hidden { display: none; }
+		.overlay h2 { font-family: "Sora", sans-serif; font-size: 22px; font-weight: 700; color: var(--ink); }
+		.overlay p { font-size: 13.5px; max-width: 380px; margin: 0; color: var(--muted); line-height: 1.5; }
+		.badge { font-size: 11px; font-weight: 700; background: var(--accent-soft); color: var(--accent-strong); border-radius: 999px; padding: 4px 12px; letter-spacing: .06em; }
+
+		/* ---------- Night Mode Styles ---------- */
+		body.night {
+			--paper: #15100c;
+			--surface: #211a13;
+			--ink: #f7ede0;
+			--muted: #b9a891;
+			--line: #3c2f21;
+			--accent-soft: rgba(var(--wave-color-primary), .18);
+			--shadow: 0 24px 60px rgba(0,0,0,.55);
+			background: radial-gradient(circle at 80% -8%, rgba(var(--wave-color-primary), .22), transparent 30rem), linear-gradient(165deg, #1a130d 0%, #14100c 55%, #100c09 100%) !important;
+			color: var(--ink);
+		}
+		body.night .card, body.night .stage { background: rgba(33,26,19,.92); border-color: var(--line); }
+		body.night .diary-bar { background: var(--surface); border-color: var(--line); }
+		body.night .overlay { background: rgba(33,26,19,.95); }
+		body.night .btn.ghost { background: var(--surface); color: var(--ink); border-color: var(--line); }
+		body.night .howto kbd { background: var(--surface); border-color: var(--line); color: var(--ink); }
+
+		/* ---------- First-visit Rules Popup ---------- */
+		.rules-backdrop {
+			position: fixed; inset: 0; z-index: 90;
+			background: rgba(23,25,29,.45);
+			display: flex; align-items: center; justify-content: center;
+			padding: 20px;
+			backdrop-filter: blur(3px);
+		}
+		.rules-backdrop.hidden { display: none; }
+		.rules-modal {
+			background: var(--surface);
+			border: 1px solid var(--line);
+			border-radius: var(--radius);
+			box-shadow: 0 24px 60px rgba(32,36,45,.25);
+			max-width: 470px; width: 100%;
+			max-height: 85vh; overflow-y: auto;
+			padding: 26px 28px;
+			animation: rulesPop .3s cubic-bezier(.16,1,.3,1);
+		}
+		@keyframes rulesPop { from { transform: translateY(14px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+		.rules-modal h2 { font-family: "Sora", sans-serif; font-size: 21px; font-weight: 700; color: var(--ink); margin: 10px 0 6px; }
+		.rules-modal .rules-sub { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		.rules-modal .howto { display: block; }
+		.rules-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+		.rules-actions .btn { font-size: 13px; }
+		body.night .rules-backdrop { background: rgba(10,7,4,.6); }
+
+		@media (max-height: 800px) {
+			.intro { display: none; }
+			.greeting { font-size: 22px; }
+		}
+
+		@media (max-width: 900px) {
+			.layout-grid { grid-template-columns: 1fr; }
+			main { height: auto; min-height: 100dvh; overflow: visible; padding: 24px 20px 40px; }
+			.topbar { padding-left: 0; }
+			.stage { width: 100%; height: auto; aspect-ratio: 9/8; }
+		}
+	</style>
+</head>
+<body data-page="balloon-breath">
+	<script>if (document.documentElement.classList.contains('night')) document.body.classList.add('night');</script>
+	
+	<div class="app-shell">
+		<div id="sidebar-container"></div>
+
+		<main>
+			<header class="topbar">
+				<div>
+					<div class="eyebrow">Interactive Breathing Exercise</div>
+					<h1 class="greeting">Balloon Breath</h1>
+					<p class="intro">Paced slow breathing exercise. The balloon fills on every exhale, and is only released if each exhale lasts at least <b>twice</b> its inhale.</p>
+				</div>
+			</header>			<div class="layout-grid">
+				<!-- LEFT PANEL -->
+				<div class="panel">
+					<div class="diary-bar">
+						<span>Qualified Breaths: <b id="qualifiedTxt">0</b></span>
+						<span>&bull;</span>
+						<span>Leaks: <b id="failedTxt">0</b></span>
+						<span>&bull;</span>
+						<span>Fill: <b id="diaryFill">0%</b></span>
+					</div>
+					<div class="card">
+						<h2>Balloon Fill</h2>
+						<div class="label-row"><span>Empty</span><span id="fillTxt">0</span><span>Released</span></div>
+						<div class="meter"><div class="target"></div><div class="fill" id="fillMeter"></div></div>
+						<div class="label-row" style="margin-top:14px"><span>Phase</span><span id="cycleTxt">—</span></div>
+						<div id="phaseTxt">Ready</div>
+						<div id="phaseHint">Press START. Fill past the target, then the balloon is released.</div>
+						<div class="label-row" style="margin-top:10px"><span>Target</span><span>Need <b id="targetTxt">80</b> to release</span></div>
+					</div>
+
+					<div class="card breath-wrap" id="breathCard">
+						<h2>Ratio — In : Out</h2>
+						<div class="ratio-bar">
+							<div class="ratio-in">IN</div>
+							<div class="ratio-track">
+								<div class="ratio-out" id="ratioOut"></div>
+							</div>
+						</div>
+						<div class="ratio-read"><span>Current <b id="ratioTxt">1:0.0</b></span><span>Target <b>1:2.0</b></span></div>
+						<div class="breath-txt" id="paceTxt">Keep it slow and steady</div>
+					</div>
+
+					<div class="card">
+						<h2>Session Control</h2>
+						<div class="cycles">
+							<div class="dot" id="c1"></div><div class="dot" id="c2"></div><div class="dot" id="c3"></div>
+						</div>
+						<div class="row">
+							<button class="btn small" id="btnStart">▶ Start</button>
+							<button class="btn small ghost" id="btnReset">Reset</button>
+							<button class="btn small ghost" id="btnHard" title="Also press X">💥 Hard blow</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- STAGE -->
+				<div class="stage-wrap">
+					<div class="stage" id="stage">
+						<div class="flash" id="flash"></div>
+
+						<svg viewBox="0 0 360 330" xmlns="http://www.w3.org/2000/svg" aria-label="a balloon">
+							<defs>
+								<path id="bodyShape" d="M 180 30 C 252 30 296 88 296 148 C 296 214 240 262 196 278 C 189 281 171 281 164 278 C 120 262 64 214 64 148 C 64 88 108 30 180 30 Z"/>
+								<clipPath id="bodyClip"><use href="#bodyShape"/></clipPath>
+								<radialGradient id="latex" cx="36%" cy="28%" r="80%">
+									<stop offset="0%" stop-color="#ffeadb"/>
+									<stop offset="38%" stop-color="#f37b32"/>
+									<stop offset="100%" stop-color="#ed7130"/>
+								</radialGradient>
+							</defs>
+
+							<!-- String + Knot -->
+							<g id="stringG">
+								<path d="M 180 296 C 199 310 163 318 181 330" fill="none" stroke="var(--ink)" stroke-width="2.6" stroke-linecap="round"/>
+								<path d="M 171 280 L 189 280 L 184 296 L 176 296 Z" fill="#ed7130" stroke="var(--ink)" stroke-width="2.6" stroke-linejoin="round"/>
+							</g>
+
+							<g id="balloonG">
+								<use href="#bodyShape" fill="url(#latex)" stroke="var(--ink)" stroke-width="3.4"/>
+								<g clip-path="url(#bodyClip)">
+									<ellipse cx="132" cy="102" rx="30" ry="47" fill="#fff" opacity=".42" transform="rotate(-22 132 102)"/>
+									<ellipse cx="240" cy="206" rx="19" ry="11" fill="#fff" opacity=".13" transform="rotate(24 240 206)"/>
+									<!-- Wrinkles -->
+									<g id="wrinkles">
+										<path d="M 150 262 Q 180 268 212 258" fill="none" stroke="#bf3255" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"/>
+										<path d="M 168 272 Q 180 275 194 270" fill="none" stroke="#bf3255" stroke-opacity=".4" stroke-width="1.8" stroke-linecap="round"/>
+									</g>
+									<!-- Stretch lines -->
+									<g id="stretch" stroke="#fff" stroke-opacity=".5" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0">
+										<path d="M 180 40 L 180 60"/>
+										<path d="M 120 60 L 130 78"/>
+										<path d="M 240 60 L 230 78"/>
+										<path d="M 86 140 L 104 142"/>
+										<path d="M 274 140 L 256 142"/>
+										<path d="M 118 226 L 132 212"/>
+										<path d="M 242 226 L 228 212"/>
+									</g>
+								</g>
+							</g>
+						</svg>
+
+						<!-- START OVERLAY -->
+						<div class="overlay" id="startOverlay">
+							<div class="badge">SESSION START</div>
+							<h2>Fill the Balloon</h2>
+							<p>Three slow breaths. Air is registered when each exhale runs at least twice as long as its inhale (4s in, 8s out).</p>
+							<button class="btn" id="btnGo">▶ Start Breathing</button>
+							<p style="font-size:11.5px; margin-top: 4px;">Press and <kbd>hold Space</kbd> or hold touch on the balloon to exhale.</p>
+						</div>
+
+						<!-- END OVERLAY -->
+						<div class="overlay hidden" id="endOverlay">
+							<div style="font-size:38px" id="endIcon">🎈</div>
+							<h2 id="endTitle">Released</h2>
+							<p id="endStats"></p>
+							<div class="row" style="margin-top:8px">
+								<button class="btn" id="btnAgain">Play Again</button>
+								<button class="btn ghost" id="btnClose">Close</button>
+							</div>
+						</div>
+					</div>
+					<div class="breath-txt" style="margin-top:10px">Hold <b>Space</b> / hold balloon = gentle exhale &nbsp;&bull;&nbsp; <b>X</b> = hard blow (burst)</div>
+				</div>
+			</div>
+		</main>
+	</div>
+
+	<!-- FIRST-VISIT RULES POPUP -->
+	<div class="rules-backdrop hidden" id="rulesBackdrop" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+		<div class="rules-modal">
+			<div class="badge">HOW TO PLAY</div>
+			<h2 id="rulesTitle">Before You Breathe</h2>
+			<p class="rules-sub">The balloon fills on every exhale — but only if each exhale lasts at least <b>twice</b> its inhale.</p>
+			<div class="howto">
+				1. <b>Breathe IN</b> — paced, 4s. Balloon holds.<br>
+				2. <b>Hold</b> — 1s.<br>
+				3. <b>Breathe OUT</b> — gently, until the ratio hits <b>1:2.0</b> (8s). <kbd>Hold Space</kbd> or press and hold the balloon.<br><br>
+				<b>Qualified</b> exhale &rarr; the balloon inflates and holds air.<br>
+				<b>Stop early</b> &rarr; it leaks (−10 fill). <b>Blow too hard</b> (press <kbd>X</kbd>) &rarr; it bursts (−18).<br>
+				3 qualified breaths reach 100%. The target is <b>80</b> to release.
+			</div>
+			<div class="cite" style="margin-top:12px">
+				<b>Why it works:</b> Paced slow breathing (~4.5–6.5 bpm) maximizes HRV and helps reduce acute stress. IN 4s + HOLD 1s + OUT 8s &approx; 4.6 breaths/min.
+			</div>
+			<div class="rules-actions">
+				<button class="btn" id="btnRulesOk">Got it — let's breathe</button>
+			</div>
+		</div>
+	</div>
+
+<script>
+(function(){
+  "use strict";
+  /* ================= CONFIG ================= */
+  const IN       = 4;        // paced inhale (s)
+  const HOLD     = 1;        // brief hold
+  const OUT_MIN  = IN * 2;   // 8s — exhale must last >= 2x inhale
+  const CYCLES   = 3;        // qualified breaths required
+
+  const PER_BREATH   = 100 / CYCLES;  
+  const LEAK_STALL   = 10;   // fill lost when exhale stops early
+  const LEAK_BURST   = 18;   // fill lost on gust burst
+  const RELEASE_TARGET = 80; // fill needed for release
+
+  const AIR_MIN     = 0.10;  
+  const GENTLE_MAX  = 0.62;  
+  const STALL_LIMIT = 0.9;   
+  const HARD_LIMIT  = 0.35;  
+  const GRACE       = 0.8;   
+
+  /* ================= DOM ================= */
+  const $ = id => document.getElementById(id);
+  const stage = $("stage"), flash = $("flash");
+  const fillMeter = $("fillMeter"), fillTxt = $("fillTxt");
+  const phaseTxt = $("phaseTxt"), phaseHint = $("phaseHint"), cycleTxt = $("cycleTxt");
+  const qualifiedTxt = $("qualifiedTxt"), failedTxt = $("failedTxt"), diaryFill = $("diaryFill");
+  const ratioOut = $("ratioOut"), ratioTxt = $("ratioTxt"), breathCard = $("breathCard");
+  const paceTxt = $("paceTxt");
+  const balloonG = $("balloonG"), stringG = $("stringG");
+  const wrinkles = $("wrinkles"), stretch = $("stretch");
+  const dots = [$("c1"), $("c2"), $("c3")];
+  $("targetTxt").textContent = RELEASE_TARGET;
+
+  /* ================= STATE ================= */
+  let running=false, released=false, phase="idle", phaseT=0;
+  let cycle=0, cycleGain=0;              
+  let earned=0, lost=0, fill=0;          
+  let qualified=0, failed=0;
+  let exhaleT=0, stallT=0, hardT=0;
+  let beatT=0, beatKind=null;            
+  let breathePulse=0, popT=0, shakeT=0;  
+  const POP_DUR=0.55, SHAKE_DUR=0.5;
+
+  // Key/Mouse input
+  let blowKey=false, blowMouse=false;
+  let ctx=null;
+
+  /* ================= AUDIO FX ================= */
+  function ensureAudio(){
+    if(ctx) return true;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return false;
+    try{ ctx = new AC(); }catch(e){ ctx=null; }
+    return !!ctx;
+  }
+  function resumeAudio(){ if(ctx && ctx.state === "suspended") ctx.resume(); }
+
+  function noise(dur, freq, gain, decay){
+    if(!ctx) return;
+    try{
+      const src = ctx.createBufferSource();
+      const buffer = ctx.createBuffer(1, Math.max(1, ctx.sampleRate*dur), ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1)*Math.pow(1-i/data.length, decay);
+      src.buffer = buffer;
+      const f = ctx.createBiquadFilter(); f.type="lowpass"; f.frequency.value=freq;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(gain, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+dur);
+      src.connect(f); f.connect(g); g.connect(ctx.destination);
+      src.start();
+    }catch(e){}
+  }
+  const playLeak  = () => noise(0.30, 1800, 0.16, 1.4);   
+  const playBurst = () => noise(0.18, 4200, 0.42, 2.2);   
+  const playRelease = () => noise(0.85, 900, 0.22, 1.1);  
+
+  /* ================= GAME LOOP ================= */
+  let last = performance.now();
+
+  function loop(now){
+    requestAnimationFrame(loop);
+    const dt = Math.min(0.05, (now-last)/1000); last = now;
+    const air = getAir();
+    breathePulse += (air - breathePulse) * Math.min(1, dt*7);
+    if(popT>0)   popT   = Math.max(0, popT   - dt);
+    if(shakeT>0) shakeT = Math.max(0, shakeT - dt);
+
+    if(running && !released){
+      if(beatT > 0){
+        beatT -= dt;
+        if(beatT <= 0) endBeat();
+      } else {
+        stepPhase(dt, air);
+      }
+    }
+    renderUI();
+  }
+
+  function getAir(){
+    return (blowKey || blowMouse) ? 0.38 : 0;
+  }
+
+  function stepPhase(dt, air){
+    phaseT += dt;
+
+    if(phase==="inhale"){
+      if(phaseT>=IN){ phase="hold"; phaseT=0; updateCopy(); }
+      else if(Math.floor(phaseT*4)!==Math.floor((phaseT-dt)*4)) updateCopy();
+
+    } else if(phase==="hold"){
+      if(phaseT>=HOLD){
+        phase="exhale"; phaseT=0; exhaleT=0; stallT=0; hardT=0;
+        breathCard.classList.add("show"); updateCopy();
+      }
+
+    } else if(phase==="exhale"){
+      hardT = air > GENTLE_MAX ? hardT + dt : Math.max(0, hardT - dt*1.5);
+      if(hardT > HARD_LIMIT) return fail("burst");
+
+      if(air >= AIR_MIN){
+        stallT = 0;
+        exhaleT += dt;
+        addFill((PER_BREATH/OUT_MIN)*dt);
+      } else if(phaseT > GRACE){
+        stallT += dt;
+        if(stallT > STALL_LIMIT) return fail("stall");
+      }
+
+      if(exhaleT >= OUT_MIN) return pass();
+    }
+  }
+
+  function syncFill(){ fill = Math.max(0, Math.min(100, Math.round((earned-lost)*1000)/1000)); }
+  function addFill(amount){
+    const room = PER_BREATH - cycleGain;       
+    const gain = Math.max(0, Math.min(amount, room));
+    cycleGain += gain; earned += gain;
+    syncFill();
+  }
+  function applyLeak(amount){ lost += amount; syncFill(); }
+
+  function pass(){
+    qualified++;
+    phase = "qualify"; beatKind = "pass"; beatT = 0.8;
+    breathCard.classList.remove("show");
+    updateCopy();
+  }
+
+  function fail(kind){
+    failed++;
+    applyLeak(kind==="burst" ? LEAK_BURST : LEAK_STALL);
+    if(kind==="burst"){
+      phase = "burst"; beatKind = "burst"; beatT = 1.15;
+      popT = POP_DUR;
+      flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
+      spawnBits();
+      playBurst();
+    } else {
+      phase = "leak"; beatKind = "leak"; beatT = 0.95;
+      shakeT = SHAKE_DUR;
+      spawnHiss();
+      playLeak();
+    }
+    breathCard.classList.remove("show");
+    updateCopy();
+  }
+
+  function endBeat(){
+    const kind = beatKind; beatKind = null;
+    if(kind==="pass"){
+      cycle++;
+      cycleGain = 0;                       
+      if(cycle >= CYCLES) return finale();
+      phase = "inhale"; phaseT = 0; updateCopy();
+    } else {
+      phase = "inhale"; phaseT = 0; updateCopy();
+    }
+  }
+
+  function finale(){
+    if(fill >= RELEASE_TARGET) release();
+    else incomplete();
+  }
+
+  function release(){
+    released = true; phase = "release";
+    breathCard.classList.remove("show");
+    balloonG.style.transform = "";         
+    balloonG.classList.add("release");
+    stringG.style.opacity = "0";
+    playRelease();
+    updateCopy(); renderUI();
+    $("endIcon").textContent = "🎈";
+    $("endTitle").textContent = "Released.";
+    $("endStats").textContent =
+      `${qualified}/${CYCLES} breaths qualified at 1:2 or longer, finishing at ${Math.round(fill)}% fill. ` +
+      (failed===0 ? "No leaks, no pops." : `${failed} slip${failed>1?"s":""} along the way — still released.`);
+    $("endOverlay").classList.remove("hidden");
+  }
+
+  function incomplete(){
+    phase = "incomplete";
+    breathCard.classList.remove("show");
+    playLeak();
+    updateCopy(); renderUI();
+    $("endIcon").textContent = "😮‍💨";
+    $("endTitle").textContent = "Not released.";
+    $("endStats").textContent =
+      `Only ${Math.round(fill)}% fill — it needs ${RELEASE_TARGET}%. The air stayed in the balloon. ` +
+      `${qualified} qualified breath${qualified===1?"":"s"}, ${failed} leak${failed===1?"":"s"}/pop${failed===1?"":"s"} cost you.`;
+    $("endOverlay").classList.remove("hidden");
+  }
+
+  /* ================= UI COPY ================= */
+  function updateCopy(){
+    cycleTxt.textContent = phase==="idle" ? "—" : `breath ${Math.min(cycle+1,CYCLES)}/${CYCLES}`;
+
+    if(phase==="qualify"){
+      phaseTxt.textContent = "Qualified ✓";
+      phaseHint.textContent = "That exhale ran past 2× the inhale. The air is banked.";
+      return;
+    }
+    if(phase==="leak"){
+      phaseTxt.textContent = "Leaking…";
+      phaseHint.textContent = `Stopped early — −${LEAK_STALL} fill. Retrying breath.`;
+      return;
+    }
+    if(phase==="burst"){
+      phaseTxt.textContent = "Popped!";
+      phaseHint.textContent = `Blown too hard — −${LEAK_BURST} fill. Keep exhalations steady.`;
+      return;
+    }
+    if(phase==="release"){
+      phaseTxt.textContent = "Released 🎈";
+      phaseHint.textContent = "The balloon emptied smoothly.";
+      return;
+    }
+    if(phase==="incomplete"){
+      phaseTxt.textContent = "Still held";
+      phaseHint.textContent = "Not enough fill reached to trigger release.";
+      return;
+    }
+    if(phase==="inhale"){
+      phaseTxt.textContent = "Breathe IN…  "+Math.max(0,Math.ceil(IN-phaseT))+"s";
+      phaseHint.textContent = "Through your nose, slow and steady.";
+    } else if(phase==="hold"){
+      phaseTxt.textContent = "Hold…  "+Math.max(0,Math.ceil(HOLD-phaseT))+"s";
+      phaseHint.textContent = "Brief pause before exhaling.";
+    } else if(phase==="exhale"){
+      phaseTxt.textContent = "Breathe OUT…  "+exhaleT.toFixed(1)+"s / "+OUT_MIN+"s";
+      phaseHint.textContent = "Gently hold Space or press the balloon canvas.";
+    } else {
+      phaseTxt.textContent = "Ready";
+      phaseHint.textContent = "Press START. Fill past the target, then the balloon is released.";
+    }
+  }
+
+  /* ================= RENDER ================= */
+  function renderUI(){
+    const f = Math.max(0, Math.min(100, fill));
+    fillTxt.textContent = Math.round(f);
+    fillMeter.style.width = f + "%";
+    fillMeter.style.background =
+      f >= RELEASE_TARGET ? "#4fb477" : f >= RELEASE_TARGET*0.6 ? "var(--gold)" : "var(--accent)";
+    diaryFill.textContent = Math.round(f) + "%";
+    qualifiedTxt.textContent = qualified;
+    failedTxt.textContent = failed;
+
+    if(breathCard.classList.contains("show")){
+      const prog = Math.min(1, exhaleT/OUT_MIN);
+      ratioOut.style.width = (prog*100) + "%";
+      ratioOut.classList.toggle("ok", prog >= 1);
+      ratioTxt.textContent = exhaleT>0.15 ? "1:"+(exhaleT/IN).toFixed(1) : "1:0.0";
+      const air = getAir();
+      paceTxt.textContent = air < AIR_MIN ? (transitionArmed() ? "Keep exhaling…" : "Exhale gently, don't stop") : "Good — slow and steady";
+    }
+
+    if(!released){
+      const base = 0.62 + (f/100)*0.44;
+      const k = 1 + breathePulse*0.04;
+      let sx = base*k, sy = base/k;
+      if(popT>0){                                   
+        const e = 1 - popT/POP_DUR;
+        const w = 1 + 0.26*Math.sin(e*Math.PI);
+        sx *= w; sy *= w;
+      }
+      if(shakeT>0){                                 
+        const e = 1 - shakeT/SHAKE_DUR;
+        const j = 1 + 0.05*Math.sin(e*Math.PI*7)*(shakeT/SHAKE_DUR);
+        sx *= j; sy /= j;
+      }
+      balloonG.style.transform = `scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
+    }
+    wrinkles.style.opacity = String(Math.max(0, Math.min(.7, 1 - f/45)));
+    stretch.style.opacity  = String(Math.max(0, Math.min(.6, (f-70)/30*0.6)));
+
+    for(let i=0;i<CYCLES;i++){
+      dots[i].classList.toggle("done", i<cycle);
+      dots[i].classList.toggle("partial", i===cycle && cycleGain>0);
+    }
+  }
+
+  function transitionArmed(){ return phase==="exhale" && phaseT<=GRACE; }
+
+  /* ================= FX ================= */
+  function spawnHiss(){
+    for(let i=0;i<5;i++){
+      const d = document.createElement("div");
+      d.className = "hiss";
+      d.style.left = (46+Math.random()*10) + "%";
+      d.style.top  = (78+Math.random()*8) + "%";
+      d.style.height = (10+Math.random()*14) + "px";
+      d.style.setProperty("--dx", (Math.random()*70-35) + "px");
+      d.style.setProperty("--dy", (10+Math.random()*30) + "px");
+      d.style.animationDelay = (Math.random()*0.12) + "s";
+      stage.appendChild(d);
+      setTimeout(()=>d.remove(), 1200);
+    }
+  }
+  function spawnBits(){
+    for(let i=0;i<12;i++){
+      const b = document.createElement("div");
+      b.className = "bit";
+      b.style.left = (46+Math.random()*10) + "%";
+      b.style.top  = (38+Math.random()*12) + "%";
+      b.style.setProperty("--dx", (Math.random()*220-110) + "px");
+      b.style.setProperty("--dy", (-40+Math.random()*140) + "px");
+      b.style.animationDelay = (Math.random()*0.08) + "s";
+      stage.appendChild(b);
+      setTimeout(()=>b.remove(), 1100);
+    }
+  }
+
+  /* ================= CONTROLS ================= */
+  function startRun(){
+    if(running && !released) return;
+    running = true; released = false;
+    qualified = 0; failed = 0; cycle = 0; cycleGain = 0;
+    earned = 0; lost = 0; fill = 0;
+    phase = "inhale"; phaseT = 0; exhaleT = 0; stallT = 0; hardT = 0;
+    beatT = 0; beatKind = null; popT = 0; shakeT = 0;
+    breathCard.classList.remove("show");
+    balloonG.classList.remove("release");
+    balloonG.style.transform = "";
+    stringG.style.opacity = "1";
+    $("endOverlay").classList.add("hidden");
+    $("startOverlay").classList.add("hidden");
+    updateCopy(); renderUI();
+    ensureAudio(); resumeAudio();
+  }
+
+  function resetRun(){
+    running = false; released = false;
+    phase = "idle"; phaseT = 0; exhaleT = 0; cycle = 0; cycleGain = 0;
+    earned = 0; lost = 0; fill = 0;
+    qualified = 0; failed = 0; beatT = 0; beatKind = null; popT = 0; shakeT = 0;
+    breathCard.classList.remove("show");
+    balloonG.classList.remove("release");
+    balloonG.style.transform = "";
+    stringG.style.opacity = "1";
+    $("endOverlay").classList.add("hidden");
+    $("startOverlay").classList.remove("hidden");
+    updateCopy(); renderUI();
+  }
+
+  $("btnStart").addEventListener("click", startRun);
+  $("btnGo").addEventListener("click", startRun);
+  $("btnAgain").addEventListener("click", startRun);
+  $("btnReset").addEventListener("click", resetRun);
+  $("btnClose").addEventListener("click", ()=>{ $("endOverlay").classList.add("hidden"); });
+  $("btnHard").addEventListener("click", ()=>{
+    if(!running) { phaseHint.textContent = "Start a session first."; return; }
+    if(phase==="exhale") fail("burst");
+    else { phaseHint.textContent = "You can only pop it while exhaling."; }
+  });
+
+  window.addEventListener("keydown", e=>{
+    if(e.code==="Space"){
+      if(!running) return;
+      e.preventDefault();
+      if(!e.repeat) blowKey = true;
+    }
+    if(e.code==="KeyX" && running && phase==="exhale") fail("burst");
+    if(e.code==="KeyR") resetRun();
+  });
+  window.addEventListener("keyup", e=>{ if(e.code==="Space") blowKey = false; });
+  stage.addEventListener("pointerdown", e=>{ e.preventDefault(); blowMouse = true; if(!running) startRun(); });
+  window.addEventListener("pointerup", ()=>{ blowMouse = false; });
+
+  /* ================= FIRST-VISIT RULES POPUP ================= */
+  const RULES_SEEN_KEY = "balloon-breath-rules-seen";
+  const rulesBackdrop = $("rulesBackdrop");
+  let rulesSeen = false;
+  try { rulesSeen = localStorage.getItem(RULES_SEEN_KEY) === "1"; } catch(e) {}
+
+  function hideRulesPopup(){
+    rulesBackdrop.classList.add("hidden");
+    try { localStorage.setItem(RULES_SEEN_KEY, "1"); } catch(e) {}
+  }
+
+  if(!rulesSeen){
+    rulesBackdrop.classList.remove("hidden");
+    $("btnRulesOk").addEventListener("click", hideRulesPopup);
+    rulesBackdrop.addEventListener("click", e=>{ if(e.target === rulesBackdrop) hideRulesPopup(); });
+    window.addEventListener("keydown", e=>{ if(e.code==="Escape" && !rulesBackdrop.classList.contains("hidden")) hideRulesPopup(); });
+  }
+
+  setInterval(()=>{ if(running) updateCopy(); }, 250);
+  requestAnimationFrame(loop);
+  updateCopy(); renderUI();
+})();
+</script>
+<script src="sidebar.js"></script>
+<script src="config.js"></script>
+<script src="emora-bot.js"></script>
+</body>
+</html>
