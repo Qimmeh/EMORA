@@ -134,6 +134,7 @@ def discard_calendar_timetable():
 
 
 @api_bp.route("/calendar/timetable/memory", methods=["GET"])
+@api_bp.route("/timetable/memory", methods=["GET"])
 @require_user
 def get_cached_calendar_timetable():
     return jsonify({
