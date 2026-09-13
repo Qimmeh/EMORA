@@ -236,7 +236,10 @@
 
   async function loadInitialTimetable() {
     try {
-      const response = await fetch(apiBase + "/api/v1/calendar/timetable/memory");
+      let response = await fetch(apiBase + "/api/v1/calendar/timetable/memory");
+      if (response.status === 404 || response.status === 405) {
+        response = await fetch(apiBase + "/api/v1/timetable/memory");
+      }
       if (response.ok) {
         const data = await response.json();
         if (data.timetable && data.timetable.length) {

@@ -24,9 +24,7 @@
         window.location.hostname === '127.0.0.1'
     ) {
         apiBase = (window.location.port === '5000' || window.location.port === '') ? '' : 'http://localhost:5000';
-    } else if (window.location.hostname.includes('vercel.app')) {
-        apiBase = '';
-    } else if (isNativeMobile) {
+    } else {
         apiBase = PRODUCTION_CLOUD_BACKEND;
     }
 
