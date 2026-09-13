@@ -9,3 +9,4 @@ requests
 PyMuPDF
 Pillow
 psycopg2-binary
+huggingface_hub
