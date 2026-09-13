@@ -2,8 +2,8 @@
  * DCSION3 - Central Environment & API Configuration
  *
  * Automatically resolves the backend API endpoint:
- * - Native Mobile (Capacitor Android): Targets Google Cloud Run backend.
- * - Vercel / Web Production: Targets Google Cloud Run backend.
+ * - Native Mobile (Capacitor Android): Targets Coolify backend.
+ * - Coolify / Web Production: Uses relative endpoint or COOLIFY_BACKEND_URL.
  * - Web Browser (Localhost): Uses local Flask server on port 5000.
  */
 (function() {

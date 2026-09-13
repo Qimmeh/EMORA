@@ -47,6 +47,10 @@
                 <span class="nav-icon">✦</span>
                 <span class="tab-label">AI Assistant</span>
             </a>
+            <a href="breath-exercise.html" class="tab-item" data-page="balloon-breath">
+                <span class="nav-icon">◌</span>
+                <span class="tab-label">Breath Exercise</span>
+            </a>
             <a href="insights.html" class="tab-item" data-page="insights">
                 <span class="nav-icon">▤</span>
                 <span class="tab-label">Insights</span>
