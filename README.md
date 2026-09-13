@@ -187,33 +187,33 @@ Emora employs a modern, decoupled client-server architecture designed for high r
 ```mermaid
 flowchart TD
     subgraph Clients["1. Client Layer"]
-        Web["Web Browser\n(HTML5 / CSS / Vanilla JS)"]
-        Mobile["Mobile App\n(Capacitor Hybrid Container)"]
+        Web["Web Browser<br/>(HTML5 / CSS / Vanilla JS)"]
+        Mobile["Mobile App<br/>(Capacitor Hybrid Container)"]
     end
 
     subgraph Host["2. Application Server (Oracle VPS + Coolify)"]
         subgraph FrontendServer["Frontend Interface"]
-            UI["Responsive Dashboards & Views\n• Workload Analytics\n• Timetable & Task Manager\n• AI Companion & Emotion Theming\n• Balloon Breathing Mini-App"]
+            UI["Responsive Dashboards & Views<br/>• Workload Analytics<br/>• Timetable & Task Manager<br/>• AI Companion & Emotion Theming<br/>• Balloon Breathing Mini-App"]
         end
         subgraph BackendServer["Backend API (Python & Flask)"]
-            API["Core Application Logic\n• Task & Schedule Scheduling Engine\n• Cognitive Load & Workload Inference\n• Emotion & Theme Coordinator\n• Auth & Session Handler"]
+            API["Core Application Logic<br/>• Task & Schedule Scheduling Engine<br/>• Cognitive Load & Workload Inference<br/>• Emotion & Theme Coordinator<br/>• Auth & Session Handler"]
         end
     end
 
     subgraph DB["3. Database Layer (Supabase)"]
-        Postgres[("PostgreSQL Database\n• User Profiles & Auth\n• Timetables & Fixed/Flexible Slots\n• Micro-Tasks & Status\n• Workload Metrics & History")]
+        Postgres[("PostgreSQL Database<br/>• User Profiles & Auth<br/>• Timetables & Fixed/Flexible Slots<br/>• Micro-Tasks & Status<br/>• Workload Metrics & History")]
     end
 
     subgraph AI["4. AI Models & Gateway (OpenRouter)"]
         Gateway["OpenRouter Routing Gateway"]
-        M1["Primary Model\nLing 3.0 Flash VL (Free)\nFast Multimodal & OCR"]
-        M2["Fallback Model 1\nLlama 3.3 70B (Free)\nReasoning & Dialogue"]
-        M3["Fallback Model 2\nGemini 2.5 Flash (Cheap)\nHigh Availability Backup"]
+        M1["Primary Model<br/>Ling 3.0 Flash VL (Free)<br/>Fast Multimodal & OCR"]
+        M2["Fallback Model 1<br/>Llama 3.3 70B (Free)<br/>Reasoning & Dialogue"]
+        M3["Fallback Model 2<br/>Gemini 2.5 Flash (Cheap)<br/>High Availability Backup"]
     end
 
     subgraph Integrations["5. External Integrations"]
-        OAuth["Google OAuth 2.0\n(User Authorization)"]
-        GCal["Google Calendar API\n(Schedule Import & Sync)"]
+        OAuth["Google OAuth 2.0<br/>(User Authorization)"]
+        GCal["Google Calendar API<br/>(Schedule Import & Sync)"]
     end
 
     %% Client communication
@@ -229,7 +229,7 @@ flowchart TD
     Gateway -->|1. Primary Route| M1
     M1 -.->|Failover on Error/Rate-limit| M2
     M2 -.->|Failover on Error| M3
-    Gateway -->>|Aggregated Result| API
+    Gateway -->|Aggregated Result| API
 
     %% Calendar Integration
     API <-->|OAuth Handshake| OAuth
