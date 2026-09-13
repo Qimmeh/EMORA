@@ -6,11 +6,9 @@
 
 **Video Presentation:** [https://youtu.be/coFNilHV4Vs](https://youtu.be/coFNilHV4Vs)
 
-&nbsp;
 
 **Presentation Slides:** [https://canva.link/99wq4808xd4f8ns](https://canva.link/99wq4808xd4f8ns)
 
-&nbsp;
 
 &nbsp;
 
