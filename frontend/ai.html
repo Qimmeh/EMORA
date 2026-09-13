@@ -441,6 +441,15 @@
 			flex-direction: column;
 			position: relative;
 			padding-bottom: 0;
+			opacity: 0;
+			transform: translateY(14px);
+			transition: opacity .45s cubic-bezier(.16,1,.3,1), transform .45s cubic-bezier(.16,1,.3,1);
+		}
+		body.page-loaded .content-area { opacity: 1; transform: translateY(0); }
+		body.page-leaving .content-area {
+			opacity: 0;
+			transform: translateY(-10px);
+			transition: opacity .22s ease, transform .22s ease;
 		}
 
 		/* Views */
@@ -1726,6 +1735,31 @@
 			</section>
 
 		</main>
+
+		<!-- Bottom Fixed Fluid Wave Animation Container -->
+		<div class="fluid-wave-wrapper">
+			<svg viewBox="0 0 500 100" preserveAspectRatio="none" class="fluid-wave-svg">
+				<defs>
+					<linearGradient id="activeWaveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+						<stop id="waveStop1" offset="0%" stop-color="#FFE066" />
+						<stop id="waveStop2" offset="100%" stop-color="#F5C038" />
+					</linearGradient>
+
+					<!-- Reveal mask: a rectangle centred on x=250 -->
+					<clipPath id="waveRevealClip">
+						<rect id="waveRevealRect" x="250" y="0" width="0" height="100" />
+					</clipPath>
+				</defs>
+
+				<!-- Harmonious Dual Wave Overlay -->
+				<g id="waveGroup">
+					<!-- Background Wave Layer (Offset phase & 0.35 opacity) -->
+					<path id="emotionPathBg" fill="url(#activeWaveGrad)" opacity="0.35" d="M0,92 C125,92 125,92 250,92 C375,92 375,92 500,92 L500,100 L0,100 Z" />
+					<!-- Foreground Wave Layer (High fluid depth) -->
+					<path id="emotionPath" fill="url(#activeWaveGrad)" opacity="0.9" d="M0,92 C125,92 125,92 250,92 C375,92 375,92 500,92 L500,100 L0,100 Z" />
+				</g>
+			</svg>
+		</div>
 	</div>
 
 	<!-- Application JavaScript, GSAP Harmonious Wave Engine & Dynamic AI Intelligence -->
@@ -1832,16 +1866,20 @@
 		}
 
 		function buildWaveTimeline(paths) {
-			if (!document.getElementById('waveGroup')) return null;
+			const wg = document.getElementById('waveGroup');
+			const p1 = document.getElementById('emotionPath');
+			const p2 = document.getElementById('emotionPathBg');
+			if (!wg || !p1 || !p2) return null;
+
 			const timeline = gsap.timeline();
 
-			timeline.fromTo("#waveGroup",
+			timeline.fromTo(wg,
 				{ opacity: 0 },
 				{ opacity: 1, duration: 1.2, ease: "power2.out" },
 				0
 			);
 
-			timeline.to("#emotionPath", {
+			timeline.to(p1, {
 				attr: { d: paths[1] },
 				duration: 3.2,
 				repeat: -1,
@@ -1849,7 +1887,7 @@
 				ease: "sine.inOut"
 			}, 0);
 
-			timeline.to("#emotionPathBg", {
+			timeline.to(p2, {
 				attr: { d: paths[0] },
 				duration: 4.0,
 				repeat: -1,
@@ -1861,7 +1899,11 @@
 		}
 
 		function startWaveAnimation() {
-			if (!document.getElementById('waveGroup')) return;
+			const wg = document.getElementById('waveGroup');
+			const p1 = document.getElementById('emotionPath');
+			const p2 = document.getElementById('emotionPathBg');
+			if (!wg || !p1 || !p2) return;
+
 			if (waveTimeline) {
 				if (!isWaveActive) {
 					waveTimeline.play();
@@ -1873,11 +1915,11 @@
 			isWaveActive = true;
 			const paths = wavePaths[currentEmotion] || wavePaths.schedule;
 
-			gsap.set("#emotionPath", { attr: { d: paths[0] } });
-			gsap.set("#emotionPathBg", { attr: { d: paths[1] } });
+			gsap.set(p1, { attr: { d: paths[0] } });
+			gsap.set(p2, { attr: { d: paths[1] } });
 
 			waveTimeline = buildWaveTimeline(paths);
-			waveTimeline.play(0);
+			if (waveTimeline) waveTimeline.play(0);
 		}
 
 		function pauseOrFlattenWave() {
@@ -1890,16 +1932,24 @@
 			if (text.length === 0) {
 				if (waveTimeline) { waveTimeline.kill(); waveTimeline = null; }
 
-				gsap.to(waveGroup, {
-					opacity: 0,
-					duration: 0.8,
-					ease: "sine.inOut"
-				});
-				gsap.to(["#emotionPath", "#emotionPathBg"], {
-					attr: { d: restPath },
-					duration: 1.2,
-					ease: "sine.out"
-				});
+				const wg = document.getElementById('waveGroup');
+				const p1 = document.getElementById('emotionPath');
+				const p2 = document.getElementById('emotionPathBg');
+
+				if (wg) {
+					gsap.to(wg, {
+						opacity: 0,
+						duration: 0.8,
+						ease: "sine.inOut"
+					});
+				}
+				if (p1 && p2) {
+					gsap.to([p1, p2], {
+						attr: { d: restPath },
+						duration: 1.2,
+						ease: "sine.out"
+					});
+				}
 			}
 		}
 
@@ -2288,6 +2338,76 @@
 			};
 		}
 
+		function appendUserCard(text) {
+			if (!reflectionsStream) return;
+			const row = document.createElement('div');
+			row.className = 'stream-msg-row user';
+			row.innerHTML = `
+				<div class="stream-msg-card user">
+					<div class="stream-user-header">
+						<span class="stream-msg-time">Just now</span>
+						<span class="stream-role-badge user">You</span>
+					</div>
+					<div class="stream-msg-body">${escapeHtml(text)}</div>
+				</div>
+			`;
+			reflectionsStream.appendChild(row);
+			reflectionsStream.scrollTop = reflectionsStream.scrollHeight;
+		}
+
+		function showTypingIndicator() {
+			if (!reflectionsStream) return;
+			removeTypingIndicator();
+			const row = document.createElement('div');
+			row.className = 'stream-msg-row bot typing-indicator-row';
+			row.id = 'aiTypingIndicator';
+			row.innerHTML = `
+				<div class="stream-msg-unboxed bot">
+					<div class="stream-bot-header">
+						<div class="stream-bot-avatar" title="Emora AI Companion">
+							<svg viewBox="0 0 24 24"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/></svg>
+							<span class="avatar-live-indicator"></span>
+						</div>
+						<div class="stream-bot-meta">
+							<span class="stream-sender-name">Emora Companion</span>
+							<span class="stream-role-badge bot">Thinking…</span>
+						</div>
+					</div>
+					<div class="stream-bot-body" style="display:flex;align-items:center;gap:6px;padding:8px 0;">
+						<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F37B32;opacity:0.8;"></span>
+						<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F37B32;opacity:0.5;"></span>
+						<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F37B32;opacity:0.3;"></span>
+					</div>
+				</div>
+			`;
+			reflectionsStream.appendChild(row);
+			reflectionsStream.scrollTop = reflectionsStream.scrollHeight;
+		}
+
+		function removeTypingIndicator() {
+			const el = document.getElementById('aiTypingIndicator');
+			if (el) el.remove();
+		}
+
+		window.handleOpenPlanPreview = function(encodedPlan) {
+			if (encodedPlan) {
+				try {
+					const parsed = JSON.parse(decodeURIComponent(escape(atob(encodedPlan))));
+					localStorage.setItem('emora_pending_preview_plan', JSON.stringify(parsed));
+				} catch (e) {}
+			} else {
+				const defaultPlan = [
+					{ id: "prop-1", title: "CS 301 Lecture", day: "Mon", startHour: 10, duration: 2, location: "Hall A", badgeType: "ai_suggested", badgeText: "✦ AI Suggested" },
+					{ id: "prop-2", title: "Independent Study", day: "Wed", startHour: 14, duration: 2, location: "Library", badgeType: "ai_suggested", badgeText: "✦ AI Suggested" },
+					{ id: "prop-3", title: "Project Sync", day: "Fri", startHour: 15, duration: 2, location: "Lab 3", badgeType: "ai_suggested", badgeText: "✦ AI Suggested" }
+				];
+				if (!localStorage.getItem('emora_pending_preview_plan')) {
+					localStorage.setItem('emora_pending_preview_plan', JSON.stringify(defaultPlan));
+				}
+			}
+			window.location.href = 'timetable.html?modal=1&plan=preview';
+		};
+
 		async function saveAndConsultAI() {
 			const text = journalInput.value.trim();
 			if (!text) return;
@@ -2303,20 +2423,55 @@
 			// Show typing indicator
 			showTypingIndicator();
 
-			const delay = 750 + Math.random() * 400;
-			setTimeout(() => {
-				removeTypingIndicator();
-				const result = getCompanionIntelligence(text);
-				appendBotCard(result.text, result.actionCard);
+			const apiBase = (window.DCSION3_CONFIG && window.DCSION3_CONFIG.API_BASE_URL) || '';
+			let replyText = '';
+			let planData = null;
+			let categoryLabel = 'schedule';
 
-				// Also add to history grid
-				renderHistoryCard({
-					title: result.title,
-					content: text + " — " + result.text,
-					category: result.category || 'schedule',
-					created_at: new Date().toISOString()
-				}, true);
-			}, delay);
+			try {
+				const response = await fetch(`${apiBase}/api/v1/ai/chat`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ message: text })
+				});
+				if (response.ok) {
+					const data = await response.json();
+					if (data.ok) {
+						replyText = data.reply;
+						if (data.has_plan && data.plan) {
+							planData = {
+								title: "✦ Proposed Timetable Plan",
+								desc: "Weekly Academic & Study Sessions • Ready to inspect & apply",
+								isPlan: true
+							};
+							try {
+								localStorage.setItem('emora_pending_preview_plan', JSON.stringify(data.plan));
+							} catch (e) {}
+						}
+					}
+				}
+			} catch (err) {
+				// Fallback to local intelligence if backend unavailable
+			}
+
+			removeTypingIndicator();
+
+			if (!replyText) {
+				const local = getCompanionIntelligence(text);
+				replyText = local.text;
+				planData = local.actionCard;
+				categoryLabel = local.category || 'schedule';
+			}
+
+			appendBotCard(replyText, planData);
+
+			// Also add to history grid
+			renderHistoryCard({
+				title: planData ? planData.title : (text.slice(0, 32) + '...'),
+				content: text + " — " + replyText,
+				category: categoryLabel,
+				created_at: new Date().toISOString()
+			}, true);
 		}
 
 		function renderHistoryCard(entry, prepend = false) {
@@ -2425,6 +2580,36 @@
 
 		// Initialize wave in resting state
 		pauseOrFlattenWave();
+	</script>
+	<script>
+		// Page enter animation
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => document.body.classList.add('page-loaded'));
+		});
+
+		// Re-trigger the enter animation when restored from bfcache (browser back/forward)
+		window.addEventListener('pageshow', (e) => {
+			if (e.persisted) {
+				document.body.classList.remove('page-leaving');
+				requestAnimationFrame(() => document.body.classList.add('page-loaded'));
+			}
+		});
+
+		// Page exit animation before navigating to another internal page
+		// (delegated on document + capture phase so it also covers the sidebar,
+		// which is injected later by sidebar.js)
+		document.addEventListener('click', (e) => {
+			const link = e.target.closest('a[href$=".html"]');
+			if (!link) return;
+			if (link.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+			const href = link.getAttribute('href');
+			if (!href) return;
+			e.preventDefault();
+			e.stopPropagation();
+			document.body.classList.remove('page-loaded');
+			document.body.classList.add('page-leaving');
+			setTimeout(() => { window.location.href = href; }, 220);
+		}, true);
 	</script>
 	<script src="sidebar.js"></script>
 	<script src="config.js"></script>

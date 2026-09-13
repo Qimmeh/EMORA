@@ -555,16 +555,20 @@
 		});
 
 		// Page exit animation before navigating to another internal page
-		document.querySelectorAll('a[href$=".html"]').forEach(link => {
-			link.addEventListener('click', (e) => {
-				const href = link.getAttribute('href');
-				if (!href || link.target === '_blank' || e.metaKey || e.ctrlKey) return;
-				e.preventDefault();
-				document.body.classList.remove('page-loaded');
-				document.body.classList.add('page-leaving');
-				setTimeout(() => { window.location.href = href; }, 220);
-			});
-		});
+		// (delegated on document + capture phase so it also covers the sidebar,
+		// which is injected later by sidebar.js)
+		document.addEventListener('click', (e) => {
+			const link = e.target.closest('a[href$=".html"]');
+			if (!link) return;
+			if (link.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+			const href = link.getAttribute('href');
+			if (!href) return;
+			e.preventDefault();
+			e.stopPropagation();
+			document.body.classList.remove('page-loaded');
+			document.body.classList.add('page-leaving');
+			setTimeout(() => { window.location.href = href; }, 220);
+		}, true);
 
 		function copyToClipboard(element) {
 			const text = element.previousElementSibling.querySelector('.info-value').textContent;
