@@ -3518,7 +3518,28 @@ body.night .privacy strong {
 								body: formData
 							});
 						}
-						const data = await response.json();
+						if (!response.ok && apiBase !== '') {
+							try {
+								const fallbackRes = await fetch('/api/v1/timetable/upload', {
+									method: 'POST',
+									body: formData
+								});
+								if (fallbackRes.ok) response = fallbackRes;
+							} catch (fbErr) {
+								console.warn('Fallback relative upload failed:', fbErr);
+							}
+						}
+
+						let data = {};
+						const cType = response.headers.get('content-type') || '';
+						if (cType.includes('application/json')) {
+							data = await response.json();
+						} else {
+							const textErr = await response.text();
+							console.error('Upload endpoint returned non-JSON response:', response.status, textErr);
+							data = { error: `Server error (HTTP ${response.status})` };
+						}
+
 						importPopover.classList.remove('open');
 						if (response.ok && data.timetable) {
 							openPrototypePreviewModal(data.timetable);
@@ -3557,13 +3578,38 @@ body.night .privacy strong {
 								body: JSON.stringify({ text: text })
 							});
 						}
-						const data = await response.json();
+						if (!response.ok && apiBase !== '') {
+							try {
+								const fallbackRes = await fetch('/api/v1/timetable/parse-text', {
+									method: 'POST',
+									headers: { 'Content-Type': 'application/json' },
+									body: JSON.stringify({ text: text })
+								});
+								if (fallbackRes.ok) response = fallbackRes;
+							} catch (fbErr) {
+								console.warn('Fallback relative parse-text failed:', fbErr);
+							}
+						}
+
+						let data = {};
+						const cType = response.headers.get('content-type') || '';
+						if (cType.includes('application/json')) {
+							data = await response.json();
+						} else {
+							const textErr = await response.text();
+							console.error('Parse text endpoint returned non-JSON response:', response.status, textErr);
+							data = { error: `Server error (HTTP ${response.status})` };
+						}
+
 						importPopover.classList.remove('open');
 						if (response.ok && data.timetable) {
 							openPrototypePreviewModal(data.timetable);
+						} else {
+							alert(data.error || 'Failed to parse timetable text');
 						}
 					} catch (e) {
 						console.error('Parse text error:', e);
+						alert('Parse failed. Please ensure backend server is running.');
 					} finally {
 						confirmImportBtn.innerHTML = '<span>Import</span>';
 					}
